@@ -9,7 +9,6 @@ export async function generatePDF(html: string): Promise<Buffer> {
 
   const browser = await puppeteer.launch({
     args: isLocal ? [] : chromium.args,
-    defaultViewport: chromium.defaultViewport,
     executablePath: isLocal
       ? undefined
       : await chromium.executablePath(CHROMIUM_REMOTE_URL),
