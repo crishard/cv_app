@@ -40,9 +40,9 @@ function CVCard({ cv, onDelete }: { cv: CV; onDelete: (id: string) => void }) {
   }
 
   return (
-    <li className="flex items-center justify-between rounded-xl border bg-white px-5 py-4">
-      <div className="flex flex-col gap-1">
-        <span className="font-medium">{cv.title}</span>
+    <li className="flex items-center justify-between gap-4 rounded-xl border bg-white px-5 py-4">
+      <div className="flex min-w-0 flex-col gap-1">
+        <span className="truncate font-medium">{cv.title}</span>
         <span className="text-xs text-gray-400">
           {statusLabel[cv.status]}
           {cv.atsScore !== null && (
@@ -50,7 +50,7 @@ function CVCard({ cv, onDelete }: { cv: CV; onDelete: (id: string) => void }) {
           )}
         </span>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2">
         <button
           onClick={handleDuplicate}
           disabled={busy}
