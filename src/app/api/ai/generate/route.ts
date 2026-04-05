@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { getAnthropicClient, ATS_SYSTEM_PROMPT, PROMPTS } from "@/lib/anthropic";
+import { getAIClient, AI_MODEL } from "@/lib/openrouter";
+import { ATS_SYSTEM_PROMPT, PROMPTS } from "@/lib/anthropic";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
@@ -24,14 +25,16 @@ export async function POST(req: NextRequest) {
       ? PROMPTS.generateBullets(input)
       : PROMPTS.suggestSkills(input, context ?? []);
 
-  const message = await getAnthropicClient().messages.create({
-    model: "claude-sonnet-4-5",
+  const completion = await getAIClient().chat.completions.create({
+    model: AI_MODEL,
     max_tokens: 512,
-    system: ATS_SYSTEM_PROMPT,
-    messages: [{ role: "user", content: prompt }],
+    messages: [
+      { role: "system", content: ATS_SYSTEM_PROMPT },
+      { role: "user", content: prompt },
+    ],
   });
 
-  const text = message.content[0].type === "text" ? message.content[0].text : "";
+  const text = completion.choices[0]?.message?.content ?? "";
   const items = text.split("\n").filter(Boolean);
 
   return NextResponse.json({ items });

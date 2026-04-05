@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { getAnthropicClient, ATS_SYSTEM_PROMPT, PROMPTS } from "@/lib/anthropic";
+import { getAIClient, AI_MODEL } from "@/lib/openrouter";
+import { ATS_SYSTEM_PROMPT, PROMPTS } from "@/lib/anthropic";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
@@ -19,17 +20,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "cvText is required" }, { status: 400 });
   }
 
-  const message = await getAnthropicClient().messages.create({
-    model: "claude-sonnet-4-5",
+  const completion = await getAIClient().chat.completions.create({
+    model: AI_MODEL,
     max_tokens: 1024,
-    system: ATS_SYSTEM_PROMPT,
-    messages: [{ role: "user", content: PROMPTS.atsScore(cvText) }],
+    messages: [
+      { role: "system", content: ATS_SYSTEM_PROMPT },
+      { role: "user", content: PROMPTS.atsScore(cvText) },
+    ],
   });
 
-  const text = message.content[0].type === "text" ? message.content[0].text : "";
+  const text = completion.choices[0]?.message?.content ?? "";
 
   try {
-    const result = JSON.parse(text);
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    const result = JSON.parse(jsonMatch ? jsonMatch[0] : text);
     return NextResponse.json(result);
   } catch {
     return NextResponse.json({ error: "Failed to parse AI response" }, { status: 502 });

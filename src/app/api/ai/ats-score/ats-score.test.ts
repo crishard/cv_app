@@ -5,8 +5,11 @@ import { POST } from "./route";
 vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
 
 const mockCreate = vi.fn();
+vi.mock("@/lib/openrouter", () => ({
+  getAIClient: () => ({ chat: { completions: { create: mockCreate } } }),
+  AI_MODEL: "test-model",
+}));
 vi.mock("@/lib/anthropic", () => ({
-  getAnthropicClient: () => ({ messages: { create: mockCreate } }),
   ATS_SYSTEM_PROMPT: "system",
   PROMPTS: { atsScore: vi.fn().mockReturnValue("prompt") },
 }));
@@ -45,7 +48,7 @@ describe("POST /api/ai/ats-score", () => {
   it("returns parsed ATS score object", async () => {
     mockAuth.mockResolvedValueOnce({ user: { id: "u1" } } as never);
     mockCreate.mockResolvedValueOnce({
-      content: [{ type: "text", text: JSON.stringify(validScore) }],
+      choices: [{ message: { content: JSON.stringify(validScore) } }],
     } as never);
 
     const req = new NextRequest("http://localhost/api/ai/ats-score", {
@@ -60,10 +63,10 @@ describe("POST /api/ai/ats-score", () => {
     expect(body.suggestions).toHaveLength(3);
   });
 
-  it("returns 502 when Claude returns invalid JSON", async () => {
+  it("returns 502 when AI returns invalid JSON", async () => {
     mockAuth.mockResolvedValueOnce({ user: { id: "u1" } } as never);
     mockCreate.mockResolvedValueOnce({
-      content: [{ type: "text", text: "not valid json" }],
+      choices: [{ message: { content: "not valid json" } }],
     } as never);
 
     const req = new NextRequest("http://localhost/api/ai/ats-score", {

@@ -5,8 +5,11 @@ import { POST } from "./route";
 vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
 
 const mockCreate = vi.fn();
+vi.mock("@/lib/openrouter", () => ({
+  getAIClient: () => ({ chat: { completions: { create: mockCreate } } }),
+  AI_MODEL: "test-model",
+}));
 vi.mock("@/lib/anthropic", () => ({
-  getAnthropicClient: () => ({ messages: { create: mockCreate } }),
   ATS_SYSTEM_PROMPT: "system",
   PROMPTS: {
     generateBullets: vi.fn().mockReturnValue("prompt"),
@@ -42,7 +45,7 @@ describe("POST /api/ai/generate", () => {
   it("returns generated content as a list", async () => {
     mockAuth.mockResolvedValueOnce({ user: { id: "u1" } } as never);
     mockCreate.mockResolvedValueOnce({
-      content: [{ type: "text", text: "Led team of 5\nReduced latency by 30%" }],
+      choices: [{ message: { content: "Led team of 5\nReduced latency by 30%" } }],
     } as never);
 
     const req = new NextRequest("http://localhost/api/ai/generate", {
