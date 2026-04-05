@@ -1,9 +1,19 @@
-import puppeteer from "puppeteer";
+import chromium from "@sparticuz/chromium-min";
+import puppeteer from "puppeteer-core";
+
+const CHROMIUM_REMOTE_URL =
+  "https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar";
 
 export async function generatePDF(html: string): Promise<Buffer> {
+  const isLocal = process.env.NODE_ENV === "development";
+
   const browser = await puppeteer.launch({
+    args: isLocal ? [] : chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath: isLocal
+      ? undefined
+      : await chromium.executablePath(CHROMIUM_REMOTE_URL),
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
 
   try {
