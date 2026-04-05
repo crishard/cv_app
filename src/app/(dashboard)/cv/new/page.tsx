@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { TemplateGallery } from "@/components/templates/TemplateGallery";
 import { TemplateId } from "@/types/cv";
@@ -10,9 +10,11 @@ export default function NewCVPage() {
   const [selected, setSelected] = useState<TemplateId | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const submitting = useRef(false);
 
   async function handleCreate() {
-    if (!selected) return;
+    if (!selected || submitting.current) return;
+    submitting.current = true;
     setLoading(true);
     setError(null);
 
@@ -25,6 +27,7 @@ export default function NewCVPage() {
     if (!res.ok) {
       setError("Failed to create CV. Please try again.");
       setLoading(false);
+      submitting.current = false;
       return;
     }
 
