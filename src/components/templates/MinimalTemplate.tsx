@@ -12,7 +12,7 @@ export function MinimalTemplate({ data }: { data: CVData }) {
   const { personalInfo, experience, education, skills, certifications } = data;
 
   return (
-    <div className="mx-auto max-w-[794px] bg-white px-12 py-10 font-sans text-[15px] text-gray-800">
+    <div className="mx-auto max-w-[794px] bg-white px-12 py-10 font-sans text-[15px] text-gray-800 wrap-break-word">
       <header className="mb-6">
         <h1 className="text-2xl font-light tracking-tight text-gray-900">
           {personalInfo.fullName}

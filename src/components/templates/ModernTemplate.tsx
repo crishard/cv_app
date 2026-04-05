@@ -12,7 +12,7 @@ export function ModernTemplate({ data }: { data: CVData }) {
   const { personalInfo, experience, education, skills, certifications } = data;
 
   return (
-    <div className="mx-auto max-w-[794px] bg-white p-10 font-sans text-gray-800">
+    <div className="mx-auto max-w-[794px] bg-white p-10 font-sans text-gray-800 wrap-break-word">
       <header className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">{personalInfo.fullName}</h1>
         <p className="mt-1 text-sm text-gray-500">
