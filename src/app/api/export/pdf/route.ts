@@ -1,5 +1,7 @@
+export const runtime = "nodejs";
+
 import { NextRequest, NextResponse } from "next/server";
-import { renderToStaticMarkup } from "react-dom/server";
+import { renderToStaticMarkup } from "react-dom/server.node";
 import { createElement } from "react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
