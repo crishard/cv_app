@@ -20,7 +20,13 @@ export default async function EditCVPage({ params }: Props) {
 
   if (!cv) notFound();
 
-  const cvData = (cv.data as unknown as CVData) ?? EMPTY_CV_DATA;
+  const raw = cv.data as unknown as Partial<CVData> | null;
+  const cvData: CVData = {
+    ...EMPTY_CV_DATA,
+    ...raw,
+    personalInfo: { ...EMPTY_CV_DATA.personalInfo, ...(raw?.personalInfo ?? {}) },
+    skills: { ...EMPTY_CV_DATA.skills, ...(raw?.skills ?? {}) },
+  };
 
   async function handleSave(data: CVData) {
     "use server";

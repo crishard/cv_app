@@ -28,7 +28,13 @@ export default async function PreviewPage({ params }: Props) {
   if (!cv) notFound();
 
   const Template = TEMPLATES[cv.templateId as TemplateId] ?? ModernTemplate;
-  const cvData = (cv.data as unknown as CVData) ?? EMPTY_CV_DATA;
+  const raw = cv.data as unknown as Partial<CVData> | null;
+  const cvData: CVData = {
+    ...EMPTY_CV_DATA,
+    ...raw,
+    personalInfo: { ...EMPTY_CV_DATA.personalInfo, ...(raw?.personalInfo ?? {}) },
+    skills: { ...EMPTY_CV_DATA.skills, ...(raw?.skills ?? {}) },
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-100">
