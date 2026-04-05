@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import { FileText } from "lucide-react";
+import Link from "next/link";
 
 export default function RegisterPage() {
   return (
@@ -13,7 +13,8 @@ export default function RegisterPage() {
         </div>
         <div>
           <h2 className="text-2xl font-medium leading-snug text-white">
-            Stand out from the crowd.<br />
+            Stand out from the crowd.
+            <br />
             Get hired faster.
           </h2>
           <ul className="mt-6 space-y-3 text-sm text-zinc-400">
@@ -31,7 +32,9 @@ export default function RegisterPage() {
             </li>
           </ul>
         </div>
-        <p className="text-xs text-zinc-500">© {new Date().getFullYear()} CVForge</p>
+        <p className="text-xs text-zinc-500">
+          © {new Date().getFullYear()} CVForge
+        </p>
       </div>
 
       {/* Right panel */}
@@ -39,11 +42,17 @@ export default function RegisterPage() {
         <div className="w-full max-w-sm">
           <div className="mb-8 flex items-center gap-2 lg:hidden">
             <FileText className="h-5 w-5 text-zinc-900" />
-            <span className="text-base font-semibold tracking-tight text-zinc-900">CVForge</span>
+            <span className="text-base font-semibold tracking-tight text-zinc-900">
+              CVForge
+            </span>
           </div>
 
-          <h1 className="text-2xl font-bold text-zinc-900">Create your account</h1>
-          <p className="mt-1 text-sm text-zinc-500">Start building your resume for free.</p>
+          <h1 className="text-2xl font-bold text-zinc-900">
+            Create your account
+          </h1>
+          <p className="mt-1 text-sm text-zinc-500">
+            Start building your resume for free.
+          </p>
 
           <div className="mt-8">
             <RegisterForm />
@@ -51,7 +60,10 @@ export default function RegisterPage() {
 
           <p className="mt-6 text-center text-sm text-zinc-500">
             Already have an account?{" "}
-            <Link href="/login" className="font-medium text-zinc-900 underline underline-offset-4 hover:text-zinc-700">
+            <Link
+              href="/login"
+              className="font-medium text-zinc-900 underline underline-offset-4 hover:text-zinc-700"
+            >
               Sign in
             </Link>
           </p>
