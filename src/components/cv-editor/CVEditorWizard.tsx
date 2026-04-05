@@ -17,12 +17,25 @@ const STEP_LABELS = [
   "Review",
 ];
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 function validateStep(step: number, data: CVData): string | null {
   if (step === 0) {
     const { fullName, email, phone, location } = data.personalInfo;
     if (!fullName || !email || !phone || !location) {
       return "Please fill in all required fields before continuing.";
     }
+    if (!EMAIL_RE.test(email)) {
+      return "Please enter a valid email address.";
+    }
+  }
+  if (step === 1) {
+    const incomplete = data.experience.some((e) => !e.position || !e.company);
+    if (incomplete) return "Each experience entry requires a position and company.";
+  }
+  if (step === 2) {
+    const incomplete = data.education.some((e) => !e.institution || !e.degree);
+    if (incomplete) return "Each education entry requires an institution and degree.";
   }
   return null;
 }
