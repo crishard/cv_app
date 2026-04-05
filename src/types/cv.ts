@@ -101,6 +101,15 @@ export interface TemplateConfig {
   category: string;
 }
 
+export function mergeCVData(raw: Partial<CVData> | null | undefined): CVData {
+  return {
+    ...EMPTY_CV_DATA,
+    ...raw,
+    personalInfo: { ...EMPTY_CV_DATA.personalInfo, ...(raw?.personalInfo ?? {}) },
+    skills: { ...EMPTY_CV_DATA.skills, ...(raw?.skills ?? {}) },
+  };
+}
+
 export const TEMPLATES: TemplateConfig[] = [
   {
     id: "modern",

@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { generatePDF } from "@/lib/pdf";
 import { cvToHtml } from "@/lib/cv-to-html";
-import { CVData, TemplateId } from "@/types/cv";
+import { CVData, TemplateId, mergeCVData } from "@/types/cv";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -23,7 +23,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const html = cvToHtml(cv.data as unknown as CVData, cv.templateId as TemplateId);
+  const cvData = mergeCVData(cv.data as unknown as Partial<CVData> | null);
+  const html = cvToHtml(cvData, cv.templateId as TemplateId);
   const pdf = await generatePDF(html);
   const filename = `${cv.title.replace(/[^a-z0-9]/gi, "_")}.pdf`;
 

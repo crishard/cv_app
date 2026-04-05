@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { CVData, TemplateId, EMPTY_CV_DATA } from "@/types/cv";
+import { CVData, TemplateId, mergeCVData } from "@/types/cv";
 import { ModernTemplate } from "@/components/templates/ModernTemplate";
 import { ClassicTemplate } from "@/components/templates/ClassicTemplate";
 import { MinimalTemplate } from "@/components/templates/MinimalTemplate";
@@ -28,13 +28,7 @@ export default async function PreviewPage({ params }: Props) {
   if (!cv) notFound();
 
   const Template = TEMPLATES[cv.templateId as TemplateId] ?? ModernTemplate;
-  const raw = cv.data as unknown as Partial<CVData> | null;
-  const cvData: CVData = {
-    ...EMPTY_CV_DATA,
-    ...raw,
-    personalInfo: { ...EMPTY_CV_DATA.personalInfo, ...(raw?.personalInfo ?? {}) },
-    skills: { ...EMPTY_CV_DATA.skills, ...(raw?.skills ?? {}) },
-  };
+  const cvData = mergeCVData(cv.data as unknown as Partial<CVData> | null);
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-100">

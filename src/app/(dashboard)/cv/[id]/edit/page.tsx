@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { CVEditorWizard } from "@/components/cv-editor/CVEditorWizard";
 import { ATSScorePanel } from "@/components/cv-editor/ai-assistant/ATSScorePanel";
-import { CVData, TemplateId, EMPTY_CV_DATA } from "@/types/cv";
+import { CVData, TemplateId, mergeCVData } from "@/types/cv";
 import { cvDataToText } from "@/lib/pdf";
 
 type Props = { params: Promise<{ id: string }> };
@@ -20,13 +20,7 @@ export default async function EditCVPage({ params }: Props) {
 
   if (!cv) notFound();
 
-  const raw = cv.data as unknown as Partial<CVData> | null;
-  const cvData: CVData = {
-    ...EMPTY_CV_DATA,
-    ...raw,
-    personalInfo: { ...EMPTY_CV_DATA.personalInfo, ...(raw?.personalInfo ?? {}) },
-    skills: { ...EMPTY_CV_DATA.skills, ...(raw?.skills ?? {}) },
-  };
+  const cvData = mergeCVData(cv.data as unknown as Partial<CVData> | null);
 
   async function handleSave(data: CVData) {
     "use server";
