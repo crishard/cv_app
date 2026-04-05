@@ -5,8 +5,6 @@ const nextConfig: NextConfig = {
     "puppeteer-core",
     "@sparticuz/chromium-min",
     "@anthropic-ai/sdk",
-    "@prisma/client",
-    "prisma",
   ],
 };
 
