@@ -1,6 +1,12 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { CVList } from "./CVList";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh: vi.fn() }),
+}));
+
+global.fetch = vi.fn().mockResolvedValue({ ok: true });
 
 const mockCVs = [
   {
@@ -43,5 +49,11 @@ describe("CVList", () => {
     const links = screen.getAllByRole("link", { name: /edit/i });
     expect(links).toHaveLength(2);
     expect(links[0]).toHaveAttribute("href", "/cv/cv-1/edit");
+  });
+
+  it("renders duplicate and delete buttons for each CV", () => {
+    render(<CVList cvs={mockCVs} />);
+    expect(screen.getAllByRole("button", { name: /duplicate/i })).toHaveLength(2);
+    expect(screen.getAllByRole("button", { name: /delete/i })).toHaveLength(2);
   });
 });
