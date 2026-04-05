@@ -3,21 +3,17 @@ import { NextRequest } from "next/server";
 import { POST } from "./route";
 
 vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
+
+const mockStream = vi.fn();
 vi.mock("@/lib/anthropic", () => ({
-  anthropic: {
-    messages: {
-      stream: vi.fn(),
-    },
-  },
+  getAnthropicClient: () => ({ messages: { stream: mockStream } }),
   ATS_SYSTEM_PROMPT: "system",
   PROMPTS: { enhanceText: vi.fn().mockReturnValue("prompt") },
 }));
 
 import { auth } from "@/lib/auth";
-import { anthropic } from "@/lib/anthropic";
 
 const mockAuth = vi.mocked(auth);
-const mockStream = vi.mocked(anthropic.messages.stream);
 
 beforeEach(() => vi.clearAllMocks());
 

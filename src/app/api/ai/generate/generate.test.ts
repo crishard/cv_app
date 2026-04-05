@@ -3,8 +3,10 @@ import { NextRequest } from "next/server";
 import { POST } from "./route";
 
 vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
+
+const mockCreate = vi.fn();
 vi.mock("@/lib/anthropic", () => ({
-  anthropic: { messages: { create: vi.fn() } },
+  getAnthropicClient: () => ({ messages: { create: mockCreate } }),
   ATS_SYSTEM_PROMPT: "system",
   PROMPTS: {
     generateBullets: vi.fn().mockReturnValue("prompt"),
@@ -13,10 +15,8 @@ vi.mock("@/lib/anthropic", () => ({
 }));
 
 import { auth } from "@/lib/auth";
-import { anthropic } from "@/lib/anthropic";
 
 const mockAuth = vi.mocked(auth);
-const mockCreate = vi.mocked(anthropic.messages.create);
 
 beforeEach(() => vi.clearAllMocks());
 

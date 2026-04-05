@@ -1,11 +1,13 @@
 import Anthropic from "@anthropic-ai/sdk";
 
-const globalForAnthropic = globalThis as unknown as { anthropic: Anthropic };
+let _client: Anthropic | null = null;
 
-export const anthropic =
-  globalForAnthropic.anthropic ?? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
-if (process.env.NODE_ENV !== "production") globalForAnthropic.anthropic = anthropic;
+export function getAnthropicClient(): Anthropic {
+  if (!_client) {
+    _client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  }
+  return _client;
+}
 
 export const ATS_SYSTEM_PROMPT = `You are an expert resume writer specializing in ATS (Applicant Tracking System) optimization.
 

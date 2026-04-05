@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { anthropic, ATS_SYSTEM_PROMPT, PROMPTS } from "@/lib/anthropic";
+import { getAnthropicClient, ATS_SYSTEM_PROMPT, PROMPTS } from "@/lib/anthropic";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
       ? PROMPTS.generateBullets(input)
       : PROMPTS.suggestSkills(input, context ?? []);
 
-  const message = await anthropic.messages.create({
+  const message = await getAnthropicClient().messages.create({
     model: "claude-sonnet-4-5",
     max_tokens: 512,
     system: ATS_SYSTEM_PROMPT,
