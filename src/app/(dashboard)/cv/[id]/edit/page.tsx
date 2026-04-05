@@ -1,9 +1,7 @@
 import { notFound, redirect } from "next/navigation";
-import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { CVEditorWizard } from "@/components/cv-editor/CVEditorWizard";
-import { ATSScorePanel } from "@/components/cv-editor/ai-assistant/ATSScorePanel";
+import { CVEditorShell } from "@/components/cv-editor/CVEditorShell";
 import { CVData, TemplateId, mergeCVData } from "@/types/cv";
 import { cvDataToText } from "@/lib/pdf";
 
@@ -30,34 +28,13 @@ export default async function EditCVPage({ params }: Props) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="flex items-center justify-between border-b px-6 py-3">
-        <Link href="/dashboard" className="text-sm text-gray-500 hover:underline">
-          ← Dashboard
-        </Link>
-        <h1 className="font-semibold">{cv.title}</h1>
-        <Link
-          href={`/cv/${id}/preview`}
-          className="rounded-md bg-black px-4 py-1.5 text-sm text-white"
-        >
-          Preview & Export
-        </Link>
-      </header>
-
-      <div className="flex flex-1 gap-0">
-        <main className="flex-1 overflow-y-auto p-8">
-          <CVEditorWizard
-            cvId={id}
-            templateId={cv.templateId as TemplateId}
-            initialData={cvData}
-            onSave={handleSave}
-          />
-        </main>
-
-        <aside className="w-80 shrink-0 border-l p-6">
-          <ATSScorePanel cvText={cvDataToText(cvData)} />
-        </aside>
-      </div>
-    </div>
+    <CVEditorShell
+      cvId={id}
+      initialTitle={cv.title}
+      initialData={cvData}
+      templateId={cv.templateId as TemplateId}
+      onSave={handleSave}
+      cvText={cvDataToText(cvData)}
+    />
   );
 }

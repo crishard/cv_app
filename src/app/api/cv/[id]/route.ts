@@ -25,6 +25,23 @@ export async function DELETE(req: NextRequest, { params }: RouteContext) {
   return new NextResponse(null, { status: 204 });
 }
 
+export async function PATCH(req: NextRequest, { params }: RouteContext) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  const cv = await getOwnedCV(session.user.id, id);
+  if (!cv) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const { title } = await req.json();
+  if (!title?.trim()) return NextResponse.json({ error: "Title is required" }, { status: 400 });
+
+  const updated = await prisma.cV.update({ where: { id }, data: { title: title.trim() } });
+  return NextResponse.json(updated);
+}
+
 export async function PUT(req: NextRequest, { params }: RouteContext) {
   const session = await auth();
   if (!session?.user?.id) {
