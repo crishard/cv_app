@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { CVEditorWizard } from "./CVEditorWizard";
+import { ATSScorePanel } from "./ai-assistant/ATSScorePanel";
 import { CVData, TemplateId } from "@/types/cv";
 
 interface Props {
@@ -14,28 +15,23 @@ interface Props {
   cvText: string;
 }
 
-function EditableTitle({ cvId, initialTitle, onTitleChange }: {
+function EditableTitle({ cvId, title, onTitleChange }: {
   cvId: string;
-  initialTitle: string;
+  title: string;
   onTitleChange: (title: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState(initialTitle);
+  const [value, setValue] = useState(title);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    setValue(initialTitle);
-  }, [initialTitle]);
-
-  useEffect(() => {
-    if (editing) inputRef.current?.select();
-  }, [editing]);
+  useEffect(() => { setValue(title); }, [title]);
+  useEffect(() => { if (editing) inputRef.current?.select(); }, [editing]);
 
   async function save() {
     const trimmed = value.trim() || "Untitled CV";
     setValue(trimmed);
     setEditing(false);
-    if (trimmed === initialTitle) return;
+    if (trimmed === title) return;
     onTitleChange(trimmed);
     await fetch(`/api/cv/${cvId}`, {
       method: "PATCH",
@@ -46,7 +42,7 @@ function EditableTitle({ cvId, initialTitle, onTitleChange }: {
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Enter") save();
-    if (e.key === "Escape") { setValue(initialTitle); setEditing(false); }
+    if (e.key === "Escape") { setValue(title); setEditing(false); }
   }
 
   if (editing) {
@@ -69,7 +65,7 @@ function EditableTitle({ cvId, initialTitle, onTitleChange }: {
       title="Click to rename"
       className="group flex items-center gap-1.5 font-semibold text-zinc-900 hover:text-zinc-600 transition"
     >
-      {value}
+      {title}
       <svg className="h-3.5 w-3.5 text-zinc-400 opacity-0 group-hover:opacity-100 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 012.828 2.828L11.828 15.828a2 2 0 01-1.414.586H9v-2a2 2 0 01.586-1.414z" />
       </svg>
@@ -77,20 +73,25 @@ function EditableTitle({ cvId, initialTitle, onTitleChange }: {
   );
 }
 
-const DEFAULT_TITLES = new Set(["Untitled CV", "untitled cv"]);
+const DEFAULT_TITLES = new Set(["untitled cv"]);
 
 export function CVEditorShell({ cvId, initialTitle, initialData, templateId, onSave, cvText }: Props) {
   const [title, setTitle] = useState(initialTitle);
+
+  // Refs to avoid stale closures in useCallback
+  const titleRef = useRef(title);
+  titleRef.current = title;
   const autoUpdated = useRef(false);
 
-  async function handleDataChange(data: CVData) {
+  // Stable save function — useAutosave won't reset on every render
+  const handleDataChange = useCallback(async (data: CVData) => {
     await onSave(data);
 
     const firstName = data.personalInfo.fullName.trim().split(" ")[0];
     if (
       firstName &&
       !autoUpdated.current &&
-      (DEFAULT_TITLES.has(title.toLowerCase()) || DEFAULT_TITLES.has(initialTitle.toLowerCase()))
+      DEFAULT_TITLES.has(titleRef.current.toLowerCase())
     ) {
       autoUpdated.current = true;
       const newTitle = `${firstName}'s CV`;
@@ -101,7 +102,7 @@ export function CVEditorShell({ cvId, initialTitle, initialData, templateId, onS
         body: JSON.stringify({ title: newTitle }),
       });
     }
-  }
+  }, [onSave, cvId]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -109,11 +110,7 @@ export function CVEditorShell({ cvId, initialTitle, initialData, templateId, onS
         <Link href="/dashboard" className="text-sm text-zinc-500 hover:underline">
           ← Dashboard
         </Link>
-        <EditableTitle
-          cvId={cvId}
-          initialTitle={title}
-          onTitleChange={setTitle}
-        />
+        <EditableTitle cvId={cvId} title={title} onTitleChange={setTitle} />
         <Link
           href={`/cv/${cvId}/preview`}
           className="rounded-md bg-zinc-900 px-4 py-1.5 text-sm text-white hover:bg-zinc-700 transition"
@@ -133,23 +130,9 @@ export function CVEditorShell({ cvId, initialTitle, initialData, templateId, onS
         </main>
 
         <aside className="w-80 shrink-0 border-l p-6 bg-white">
-          <ATSScorePanelWrapper cvText={cvText} />
+          <ATSScorePanel cvText={cvText} />
         </aside>
       </div>
     </div>
   );
-}
-
-// Lazy import to avoid SSR issues
-function ATSScorePanelWrapper({ cvText }: { cvText: string }) {
-  const [Panel, setPanel] = useState<React.ComponentType<{ cvText: string }> | null>(null);
-
-  useEffect(() => {
-    import("@/components/cv-editor/ai-assistant/ATSScorePanel").then((m) => {
-      setPanel(() => m.ATSScorePanel);
-    });
-  }, []);
-
-  if (!Panel) return <div className="text-sm text-zinc-400">Loading...</div>;
-  return <Panel cvText={cvText} />;
 }

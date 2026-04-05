@@ -18,7 +18,7 @@ describe("useAutosave", () => {
     expect(onSave).not.toHaveBeenCalled();
   });
 
-  it("calls onSave after 30 seconds when data changes", async () => {
+  it("calls onSave after 3 seconds when data changes", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     const { rerender } = renderHook(
       ({ data }) => useAutosave({ cvId: "cv-1", data, onSave }),
@@ -35,28 +35,31 @@ describe("useAutosave", () => {
     expect(onSave).not.toHaveBeenCalled();
 
     await act(async () => {
-      vi.advanceTimersByTime(30000);
+      vi.advanceTimersByTime(3000);
     });
 
     expect(onSave).toHaveBeenCalledWith(updatedData);
   });
 
-  it("resets the timer when data changes before 30 seconds elapse", async () => {
+  it("resets the timer when data changes before 3 seconds elapse", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     const { rerender } = renderHook(
       ({ data }) => useAutosave({ cvId: "cv-1", data, onSave }),
       { initialProps: { data: EMPTY_CV_DATA } }
     );
 
+    // First change — starts 3s timer
     rerender({ data: { ...EMPTY_CV_DATA, personalInfo: { ...EMPTY_CV_DATA.personalInfo, fullName: "J" } } });
-    await act(async () => { vi.advanceTimersByTime(15000); });
+    await act(async () => { vi.advanceTimersByTime(1000); }); // 1s in — timer not fired yet
 
+    // Second change before timer fires — resets to a new 3s timer
     rerender({ data: { ...EMPTY_CV_DATA, personalInfo: { ...EMPTY_CV_DATA.personalInfo, fullName: "Jane" } } });
-    await act(async () => { vi.advanceTimersByTime(15000); });
+    await act(async () => { vi.advanceTimersByTime(1000); }); // another 1s — still not fired
 
     expect(onSave).not.toHaveBeenCalled();
 
-    await act(async () => { vi.advanceTimersByTime(15000); });
+    // Now let the full 3s pass from the second change
+    await act(async () => { vi.advanceTimersByTime(3000); });
     expect(onSave).toHaveBeenCalledTimes(1);
   });
 });

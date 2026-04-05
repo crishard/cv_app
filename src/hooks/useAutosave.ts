@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CVData } from "@/types/cv";
 
-const AUTOSAVE_DELAY = 30_000;
+const AUTOSAVE_DELAY = 3_000;
 
 export type AutosaveStatus = "idle" | "pending" | "saving" | "saved" | "error";
 
