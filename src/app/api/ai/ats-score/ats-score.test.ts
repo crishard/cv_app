@@ -4,11 +4,12 @@ import { POST } from "./route";
 
 vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
 
-const mockCreate = vi.fn();
 vi.mock("@/lib/openrouter", () => ({
-  getAIClient: () => ({ chat: { completions: { create: mockCreate } } }),
-  AI_MODEL: "test-model",
+  chatComplete: vi.fn(),
 }));
+
+import { chatComplete } from "@/lib/openrouter";
+const mockChatComplete = vi.mocked(chatComplete);
 vi.mock("@/lib/anthropic", () => ({
   ATS_SYSTEM_PROMPT: "system",
   PROMPTS: { atsScore: vi.fn().mockReturnValue("prompt") },
@@ -47,7 +48,7 @@ describe("POST /api/ai/ats-score", () => {
 
   it("returns parsed ATS score object", async () => {
     mockAuth.mockResolvedValueOnce({ user: { id: "u1" } } as never);
-    mockCreate.mockResolvedValueOnce({
+    mockChatComplete.mockResolvedValueOnce({
       choices: [{ message: { content: JSON.stringify(validScore) } }],
     } as never);
 
@@ -65,7 +66,7 @@ describe("POST /api/ai/ats-score", () => {
 
   it("returns 502 when AI returns invalid JSON", async () => {
     mockAuth.mockResolvedValueOnce({ user: { id: "u1" } } as never);
-    mockCreate.mockResolvedValueOnce({
+    mockChatComplete.mockResolvedValueOnce({
       choices: [{ message: { content: "not valid json" } }],
     } as never);
 

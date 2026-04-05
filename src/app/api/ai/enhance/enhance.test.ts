@@ -4,11 +4,12 @@ import { POST } from "./route";
 
 vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
 
-const mockCreate = vi.fn();
 vi.mock("@/lib/openrouter", () => ({
-  getAIClient: () => ({ chat: { completions: { create: mockCreate } } }),
-  AI_MODEL: "test-model",
+  chatStream: vi.fn(),
 }));
+
+import { chatStream } from "@/lib/openrouter";
+const mockChatStream = vi.mocked(chatStream);
 vi.mock("@/lib/anthropic", () => ({
   ATS_SYSTEM_PROMPT: "system",
   PROMPTS: { enhanceText: vi.fn().mockReturnValue("prompt") },
@@ -46,7 +47,7 @@ describe("POST /api/ai/enhance", () => {
       yield { choices: [{ delta: { content: "Improved" } }] };
       yield { choices: [{ delta: { content: " text" } }] };
     }
-    mockCreate.mockResolvedValueOnce(fakeStream() as never);
+    mockChatStream.mockResolvedValueOnce(fakeStream() as never);
 
     const req = new NextRequest("http://localhost/api/ai/enhance", {
       method: "POST",

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { getAIClient, AI_MODEL } from "@/lib/openrouter";
+import { chatStream } from "@/lib/openrouter";
 import { ATS_SYSTEM_PROMPT, PROMPTS } from "@/lib/anthropic";
 import { checkRateLimit } from "@/lib/rate-limit";
 
@@ -20,10 +20,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "field and content are required" }, { status: 400 });
   }
 
-  const stream = await getAIClient().chat.completions.create({
-    model: AI_MODEL,
+  const stream = await chatStream({
     max_tokens: 1024,
-    stream: true,
     messages: [
       { role: "system", content: ATS_SYSTEM_PROMPT },
       { role: "user", content: PROMPTS.enhanceText(field, content) },

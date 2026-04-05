@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { getAIClient, AI_MODEL } from "@/lib/openrouter";
+import { chatComplete } from "@/lib/openrouter";
 import { ATS_SYSTEM_PROMPT, PROMPTS } from "@/lib/anthropic";
 import { checkRateLimit } from "@/lib/rate-limit";
 
@@ -20,8 +20,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "cvText is required" }, { status: 400 });
   }
 
-  const completion = await getAIClient().chat.completions.create({
-    model: AI_MODEL,
+  const completion = await chatComplete({
     max_tokens: 1024,
     messages: [
       { role: "system", content: ATS_SYSTEM_PROMPT },

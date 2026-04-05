@@ -4,11 +4,12 @@ import { POST } from "./route";
 
 vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
 
-const mockCreate = vi.fn();
 vi.mock("@/lib/openrouter", () => ({
-  getAIClient: () => ({ chat: { completions: { create: mockCreate } } }),
-  AI_MODEL: "test-model",
+  chatComplete: vi.fn(),
 }));
+
+import { chatComplete } from "@/lib/openrouter";
+const mockChatComplete = vi.mocked(chatComplete);
 vi.mock("@/lib/anthropic", () => ({
   ATS_SYSTEM_PROMPT: "system",
   PROMPTS: {
@@ -44,7 +45,7 @@ describe("POST /api/ai/generate", () => {
 
   it("returns generated content as a list", async () => {
     mockAuth.mockResolvedValueOnce({ user: { id: "u1" } } as never);
-    mockCreate.mockResolvedValueOnce({
+    mockChatComplete.mockResolvedValueOnce({
       choices: [{ message: { content: "Led team of 5\nReduced latency by 30%" } }],
     } as never);
 
