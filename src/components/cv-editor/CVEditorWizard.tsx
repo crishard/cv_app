@@ -39,7 +39,7 @@ export function CVEditorWizard({ cvId, templateId, initialData, onSave }: Props)
   const [data, setData] = useState<CVData>(initialData ?? EMPTY_CV_DATA);
   const [error, setError] = useState<string | null>(null);
 
-  useAutosave({ cvId, data, onSave });
+  const autosaveStatus = useAutosave({ cvId, data, onSave });
 
   function handleNext() {
     const validationError = validateStep(step, data);
@@ -102,6 +102,14 @@ export function CVEditorWizard({ cvId, templateId, initialData, onSave }: Props)
           />
         )}
         {step === 4 && <ReviewStep data={data} templateId={templateId} />}
+      </div>
+
+      <div className="flex items-center justify-between text-xs text-gray-400">
+        {autosaveStatus === "pending" && <span>Unsaved changes</span>}
+        {autosaveStatus === "saving" && <span>Saving...</span>}
+        {autosaveStatus === "saved" && <span className="text-green-600">Saved</span>}
+        {autosaveStatus === "error" && <span className="text-red-500">Save failed</span>}
+        {autosaveStatus === "idle" && <span />}
       </div>
 
       <div className="flex justify-between">
