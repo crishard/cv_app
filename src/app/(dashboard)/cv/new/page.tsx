@@ -33,7 +33,7 @@ export default function NewCVPage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10">
+    <main className="mx-auto max-w-3xl px-4 py-10 bg-white min-h-screen">
       <h1 className="mb-2 text-2xl font-bold">Choose a template</h1>
       <p className="mb-8 text-sm text-gray-500">
         All templates are ATS-optimized. You can change this later.
