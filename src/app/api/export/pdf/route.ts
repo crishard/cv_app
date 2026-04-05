@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
   const pdf = await generatePDF(html);
   const filename = `${cv.title.replace(/[^a-z0-9]/gi, "_")}.pdf`;
 
-  return new NextResponse(pdf, {
+  return new NextResponse(new Uint8Array(pdf), {
     status: 200,
     headers: {
       "content-type": "application/pdf",
