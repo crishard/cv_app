@@ -2,21 +2,37 @@
 
 > An intelligent CV builder that helps professionals create ATS-compliant resumes using AI-powered content suggestions and real-time optimization scoring.
 
-![Status](https://img.shields.io/badge/status-in%20development-yellow)
-![Stack](https://img.shields.io/badge/stack-Next.js%20%7C%20Prisma%20%7C%20Claude%20API-blue)
+![Status](https://img.shields.io/badge/status-live-brightgreen)
+![Stack](https://img.shields.io/badge/stack-Next.js%20%7C%20Prisma%20%7C%20AI-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
+
+---
+
+## Screenshots
+
+### Dashboard
+![Dashboard](images/dashboard.png)
+
+### Template Selection
+![Templates](images/templetates.png)
+
+### CV Editor
+![Editor](images/creating.png)
+
+### Preview & Export
+![Preview](images/preview-and-export.png)
 
 ---
 
 ## Overview
 
-CVForge solves a critical problem for job seekers: most resumes fail to pass Applicant Tracking Systems (ATS) before a human ever reads them. This application combines professional CV templates designed specifically for ATS compatibility with Claude AI to help users write stronger, keyword-optimized content.
+CVForge solves a critical problem for job seekers: most resumes fail to pass Applicant Tracking Systems (ATS) before a human ever reads them. This application combines professional CV templates designed specifically for ATS compatibility with AI to help users write stronger, keyword-optimized content.
 
 **Key differentiators:**
 - Templates engineered for ATS parsing (no tables, columns, or graphics in critical fields)
 - AI assistant that rewrites experience bullets using action-verb + impact format
 - Real-time ATS Score with actionable improvement suggestions
-- Job description analyzer that aligns CV keywords to a specific role
+- Autosave every 3 seconds so no work is lost
 
 ---
 
@@ -24,13 +40,12 @@ CVForge solves a critical problem for job seekers: most resumes fail to pass App
 
 | Feature | Description |
 |---|---|
-| Template Gallery | 3+ ATS-compliant templates (Modern, Classic, Minimal) |
+| Template Gallery | 3 ATS-compliant templates (Modern, Classic, Minimal) |
 | Step-by-step Editor | Guided wizard across 5 sections with autosave |
-| AI Enhancement | Claude rewrites summaries and experience bullets |
+| AI Enhancement | Rewrites summaries and experience bullets |
 | ATS Score | 0–100 score with breakdown and fix suggestions |
-| Keyword Optimizer | Match CV keywords to a target job description |
 | PDF Export | Server-side PDF generation with text-selectable output |
-| Auth | Email/password + Google OAuth |
+| Auth | Email/password registration |
 
 ---
 
@@ -39,12 +54,13 @@ CVForge solves a critical problem for job seekers: most resumes fail to pass App
 | Layer | Technology |
 |---|---|
 | Framework | Next.js 15 (App Router) |
-| UI | React + Tailwind CSS + shadcn/ui |
-| ORM | Prisma |
-| Database | PostgreSQL (Neon) |
-| AI | Anthropic Claude API (claude-sonnet-4-5) |
+| UI | React + Tailwind CSS |
+| ORM | Prisma 5 |
+| Database | PostgreSQL (Supabase) |
+| AI | OpenRouter (Gemini 2.0 Flash / Llama 3.3 70B) |
 | Auth | NextAuth.js v5 |
-| PDF | Puppeteer (server-side) |
+| PDF | Puppeteer + @sparticuz/chromium-min |
+| Testing | Vitest + React Testing Library |
 | Deploy | Vercel |
 
 ---
@@ -57,30 +73,32 @@ src/
 │   ├── (auth)/             # Login, Register
 │   ├── (dashboard)/
 │   │   ├── dashboard/      # CV list
-│   │   ├── cv/
-│   │   │   ├── new/        # Template selection
-│   │   │   ├── [id]/edit/  # Step-by-step editor
-│   │   │   └── [id]/preview/
-│   │   └── templates/
+│   │   └── cv/
+│   │       ├── new/        # Template selection
+│   │       └── [id]/
+│   │           ├── edit/   # Step-by-step editor
+│   │           └── preview/
 │   └── api/
 │       ├── auth/
-│       ├── cv/             # CRUD
+│       ├── cv/             # CRUD + PATCH title
 │       ├── ai/
-│       │   ├── enhance/    # Rewrite text with AI
-│       │   ├── generate/   # Generate section content
+│       │   ├── enhance/    # Rewrite text with AI (streaming)
+│       │   ├── generate/   # Generate bullets / skills
 │       │   └── ats-score/  # ATS analysis
 │       └── export/pdf/
 ├── components/
 │   ├── cv-editor/
-│   │   ├── steps/          # Wizard steps
-│   │   ├── sections/       # CV section forms
-│   │   └── ai-assistant/   # AI suggestion panel
-│   ├── templates/          # Visual CV templates
+│   │   ├── steps/          # Wizard steps (PersonalInfo, Experience…)
+│   │   ├── CVEditorShell   # Header + autosave + title management
+│   │   └── ai-assistant/   # ATS Score panel
+│   ├── templates/          # ModernTemplate, ClassicTemplate, MinimalTemplate
 │   └── ui/
 ├── lib/
-│   ├── anthropic.ts
+│   ├── openrouter.ts       # AI client with free model fallback chain
 │   ├── prisma.ts
-│   └── pdf.ts
+│   ├── pdf.ts
+│   ├── cv-to-html.ts       # HTML generator for PDF
+│   └── rate-limit.ts
 └── types/cv.ts
 ```
 
@@ -89,71 +107,55 @@ src/
 ## Data Model
 
 ```
-User ──< CV >── Template
-                 │
-                 └── data: JSON (CVData)
-                       ├── personalInfo
-                       ├── experience[]
-                       ├── education[]
-                       ├── skills
-                       ├── certifications[]
-                       └── projects[]
+User ──< CV
+          │
+          └── data: JSON (CVData)
+                ├── personalInfo
+                ├── experience[]
+                ├── education[]
+                ├── skills
+                ├── certifications[]
+                └── projects[]
 ```
-
----
-
-## Development Roadmap
-
-See [`docs/sprints.md`](docs/sprints.md) for the full sprint breakdown.
-
-| Sprint | Focus | Status |
-|---|---|---|
-| 1 | Auth + Project foundation | In progress |
-| 2 | Templates + Step editor | Planned |
-| 3 | Claude AI integration | Planned |
-| 4 | PDF export + Polish | Planned |
 
 ---
 
 ## Getting Started
 
-> Full setup instructions available in [`docs/setup.md`](docs/setup.md)
-
 ```bash
-git clone https://github.com/crishard/cvforge
-cd cvforge
+git clone https://github.com/crishard/cv_app
+cd cv_app
 npm install
-cp .env.example .env.local
+cp .env.example .env
 npx prisma migrate dev
 npm run dev
 ```
 
 **Required environment variables:**
 
-```
+```env
 DATABASE_URL=
+DIRECT_URL=
 NEXTAUTH_SECRET=
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-ANTHROPIC_API_KEY=
+NEXTAUTH_URL=
+OPENROUTER_API_KEY=
 ```
 
 ---
 
 ## Functional Requirements
 
-See [`docs/requirements.md`](docs/requirements.md) for the complete list.
-
 **Core:**
 - Users can register, login, and manage multiple CVs
 - Users select a template before editing
 - CV editor guides the user through 5 sections with field validation
-- Content autosaves every 30 seconds
+- Content autosaves every 3 seconds after last change
+- CV title is editable inline and auto-updates from the user's first name
 
 **AI:**
-- Any text field can be enhanced by Claude on demand
-- ATS Score analyzes the full CV and returns a 0–100 rating
-- Keyword optimizer accepts a job description and suggests additions
+- Any text field can be enhanced by AI on demand (streaming response)
+- ATS Score analyzes the full CV and returns a 0–100 rating with breakdown
+- AI routes fall back across multiple free models automatically on rate limit
 
 **Export:**
 - CV is exported as a PDF with selectable text (ATS-readable)
@@ -163,11 +165,9 @@ See [`docs/requirements.md`](docs/requirements.md) for the complete list.
 
 ## Non-Functional Requirements
 
-- ATS templates must use single-column layout, standard fonts, no images in critical fields
+- ATS templates use single-column layout, standard fonts, no images in critical fields
 - AI routes are rate-limited to 20 requests/minute per user
 - AI responses stream to the UI for perceived performance
-- PDF generation completes in under 5 seconds
-- PDF file size under 500KB
 - All routes behind `/dashboard` require authentication
 
 ---
