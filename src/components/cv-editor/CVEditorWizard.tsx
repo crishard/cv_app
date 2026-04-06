@@ -17,6 +17,8 @@ const STEP_LABELS = [
   "Review",
 ];
 
+import { isFuture, isStartAfterEnd } from "@/lib/date-utils";
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function validateStep(step: number, data: CVData): string | null {
@@ -32,10 +34,18 @@ function validateStep(step: number, data: CVData): string | null {
   if (step === 1) {
     const incomplete = data.experience.some((e) => !e.position || !e.company);
     if (incomplete) return "Each experience entry requires a position and company.";
+    const futureStart = data.experience.some((e) => isFuture(e.startDate));
+    if (futureStart) return "Experience start date cannot be in the future.";
+    const badOrder = data.experience.some((e) => !e.current && isStartAfterEnd(e.startDate, e.endDate));
+    if (badOrder) return "Experience start date must be before the end date.";
   }
   if (step === 2) {
     const incomplete = data.education.some((e) => !e.institution || !e.degree);
     if (incomplete) return "Each education entry requires an institution and degree.";
+    const futureStart = data.education.some((e) => isFuture(e.startDate));
+    if (futureStart) return "Education start date cannot be in the future.";
+    const badOrder = data.education.some((e) => isStartAfterEnd(e.startDate, e.endDate));
+    if (badOrder) return "Education start date must be before the end date.";
   }
   return null;
 }

@@ -3,6 +3,7 @@
 import { ExperienceEntry } from "@/types/cv";
 import { nanoid } from "@/lib/nanoid";
 import { MonthYearInput } from "../MonthYearInput";
+import { isStartAfterEnd } from "@/lib/date-utils";
 
 interface Props {
   data: ExperienceEntry[];
@@ -48,6 +49,10 @@ function EntryForm({
 
   const positionInvalid = entry.position.length === 0;
   const companyInvalid = entry.company.length === 0;
+  const dateOrderError =
+    !entry.current && isStartAfterEnd(entry.startDate, entry.endDate)
+      ? "Start date must be before end date"
+      : null;
 
   return (
     <div className="rounded-xl border border-zinc-200 p-4 flex flex-col gap-3 bg-white">
@@ -92,6 +97,7 @@ function EntryForm({
             id={`startDate-${entry.id}`}
             value={entry.startDate}
             onChange={(v) => update("startDate", v)}
+            error={dateOrderError ? " " : null}
           />
         </div>
         <div className="flex flex-col gap-1">
@@ -103,6 +109,7 @@ function EntryForm({
             value={entry.endDate}
             onChange={(v) => update("endDate", v)}
             disabled={entry.current}
+            error={dateOrderError}
           />
           <label className="flex items-center gap-2 text-xs text-zinc-500 mt-1 cursor-pointer">
             <input

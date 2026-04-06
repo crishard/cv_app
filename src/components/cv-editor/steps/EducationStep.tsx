@@ -3,6 +3,7 @@
 import { EducationEntry } from "@/types/cv";
 import { nanoid } from "@/lib/nanoid";
 import { MonthYearInput } from "../MonthYearInput";
+import { isStartAfterEnd } from "@/lib/date-utils";
 
 interface Props {
   data: EducationEntry[];
@@ -98,14 +99,16 @@ export function EducationStep({ data, onChange }: Props) {
                 id={`eStart-${edu.id}`}
                 value={edu.startDate}
                 onChange={(v) => update(i, "startDate", v)}
+                error={isStartAfterEnd(edu.startDate, edu.endDate) ? " " : null}
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label htmlFor={`eEnd-${edu.id}`} className="text-sm font-medium text-zinc-700">End Date</label>
+              <label htmlFor={`eEnd-${edu.id}`} className="text-sm font-medium text-zinc-700">End / Expected Date</label>
               <MonthYearInput
                 id={`eEnd-${edu.id}`}
                 value={edu.endDate}
                 onChange={(v) => update(i, "endDate", v)}
+                error={isStartAfterEnd(edu.startDate, edu.endDate) ? "End must be after start date" : null}
               />
             </div>
           </div>
