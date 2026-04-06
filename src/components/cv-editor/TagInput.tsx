@@ -22,12 +22,24 @@ export function TagInput({ id, values, onChange, placeholder = "Type and press E
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter" || e.key === ",") {
+    if (e.key === "Enter") {
       e.preventDefault();
       add(input);
     }
     if (e.key === "Backspace" && input === "" && values.length > 0) {
       onChange(values.slice(0, -1));
+    }
+  }
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const val = e.target.value;
+    if (val.includes(",")) {
+      val.split(",").forEach((part) => {
+        if (part.trim()) add(part);
+      });
+      setInput("");
+    } else {
+      setInput(val);
     }
   }
 
@@ -42,7 +54,7 @@ export function TagInput({ id, values, onChange, placeholder = "Type and press E
   return (
     <div
       onClick={() => inputRef.current?.focus()}
-      className="flex min-h-[42px] flex-wrap gap-1.5 rounded-md border border-zinc-300 px-3 py-2 cursor-text focus-within:border-zinc-900 focus-within:ring-2 focus-within:ring-zinc-900/10 transition"
+      className="flex min-h-10.5 flex-wrap gap-1.5 rounded-md border border-zinc-300 px-3 py-2 cursor-text focus-within:border-zinc-900 focus-within:ring-2 focus-within:ring-zinc-900/10 transition"
     >
       {values.map((tag, i) => (
         <span
@@ -68,7 +80,7 @@ export function TagInput({ id, values, onChange, placeholder = "Type and press E
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
         placeholder={values.length === 0 ? placeholder : ""}
-        className="flex-1 min-w-[120px] border-none outline-none bg-transparent text-sm placeholder:text-zinc-400"
+        className="flex-1 min-w-30 border-none outline-none bg-transparent text-sm placeholder:text-zinc-400"
       />
     </div>
   );
