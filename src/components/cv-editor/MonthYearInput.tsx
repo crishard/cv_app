@@ -14,6 +14,15 @@ export function MonthYearInput({ id, value, onChange, disabled, error: externalE
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     let raw = e.target.value.replace(/\D/g, "");
     if (raw.length > 6) raw = raw.slice(0, 6);
+
+    // Clamp month to 01–12 as soon as 2 digits are entered
+    if (raw.length >= 2) {
+      let month = parseInt(raw.slice(0, 2), 10);
+      if (month < 1) month = 1;
+      if (month > 12) month = 12;
+      raw = String(month).padStart(2, "0") + raw.slice(2);
+    }
+
     let formatted = raw;
     if (raw.length > 2) {
       formatted = raw.slice(0, 2) + "/" + raw.slice(2);
